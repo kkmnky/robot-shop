@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import com.instana.sdk.annotation.Span;
+import com.instana.sdk.support.SpanSupport;
 
 @RestController
 public class Controller {
@@ -87,8 +88,13 @@ public class Controller {
     }
 
     @GetMapping("/match/{code}/{text}")
+    @Span(type = Span.Type.ENTRY, value="entry-span")
     public List<City> match(@PathVariable String code, @PathVariable String text) {
         logger.info("match code {} text {}", code, text);
+        SpanSupport.annotate(Span.Type.ENTRY, "entry-span", "tags.http.url", "/match/{code}/{text]");
+        SpanSupport.annotate(Span.Type.ENTRY, "entry-span", "tags.http.method", "GET");
+        SpanSupport.annotate(Span.Type.ENTRY, "entry-span", "tags.http.status_code", "200");
+        SpanSupport.annotate(Span.Type.ENTRY, "entry-span", "tags.error", "true");
 
         if (text.length() < 3) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -101,15 +107,16 @@ public class Controller {
          * TODO - neater
          */
         if (cities.size() > 10) {
-            cities = subListCity(cities)
+            cities = subListCity(cities);
         }
 
         return cities;
     }
 
-    @Span(value = "instana-demo")
+    @Span(value = "intermediate-span")
     private List<City> subListCity(List<City> cities) {
-        return cites.subList(0,9);
+        SpanSupport.annotate("call.name", "subListCity");
+        return cities.subList(0,9);
     }
 
     @GetMapping("/calc/{id}")
