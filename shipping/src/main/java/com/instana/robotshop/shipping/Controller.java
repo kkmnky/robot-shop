@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import com.instana.sdk.annotation.Span;
+
 @RestController
 public class Controller {
     private static final Logger logger = LoggerFactory.getLogger(Controller.class);
@@ -99,10 +101,15 @@ public class Controller {
          * TODO - neater
          */
         if (cities.size() > 10) {
-            cities = cities.subList(0, 9);
+            cities = subListCity(cities)
         }
 
         return cities;
+    }
+
+    @Span(value = "instana-demo")
+    private List<City> subListCity(List<City> cities) {
+        return cites.subList(0,9);
     }
 
     @GetMapping("/calc/{id}")
